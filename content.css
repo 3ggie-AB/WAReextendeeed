@@ -1,0 +1,1403 @@
+/* Druppy - WhatsApp Web Sticker Manager Styles */
+
+/* ==========================================================================
+   1. CHAT FOOTER BUTTON & ANTI-STACKING FIX
+   ========================================================================== */
+
+/* Prevent WhatsApp Web chat input bar & button containers from wrapping into multiple lines */
+footer div:has(> #druppy-footer-btn),
+footer div:has(#druppy-footer-btn),
+footer div[tabindex="-1"],
+footer [data-tab],
+footer form,
+footer div[role="row"] {
+  flex-wrap: nowrap !important;
+  flex-direction: row !important;
+}
+
+.druppy-footer-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  color: #8696a0 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 3px !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+  align-self: center !important;
+  position: static !important;
+  transition: all 0.18s ease !important;
+  user-select: none !important;
+  box-sizing: border-box !important;
+}
+
+.druppy-footer-btn svg {
+  width: 20px !important;
+  height: 20px !important;
+  pointer-events: none !important;
+  transition: transform 0.18s ease;
+}
+
+.druppy-logo-img {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 5px !important;
+  object-fit: contain !important;
+  pointer-events: none !important;
+  transition: transform 0.18s ease !important;
+}
+
+.druppy-footer-btn:hover .druppy-logo-img {
+  transform: scale(1.1) !important;
+}
+
+.druppy-rail-logo-img {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 7px !important;
+  object-fit: cover !important;
+  pointer-events: none !important;
+  transition: transform 0.18s ease !important;
+}
+
+.druppy-rail-btn:hover .druppy-rail-logo-img {
+  transform: scale(1.1) !important;
+}
+
+.druppy-header-logo-img {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 6px !important;
+  object-fit: cover !important;
+  vertical-align: middle !important;
+}
+
+.druppy-footer-btn:hover {
+  background-color: rgba(249, 115, 22, 0.16) !important;
+  color: #f97316 !important;
+  transform: scale(1.08) !important;
+}
+
+.druppy-footer-btn.active {
+  background-color: rgba(249, 115, 22, 0.28) !important;
+  color: #f97316 !important;
+}
+
+/* ==========================================================================
+   2. LEFT NAVIGATION RAIL BUTTON (Di bawah Meta AI)
+   ========================================================================== */
+.druppy-rail-btn-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 4px 0;
+  user-select: none;
+}
+
+.druppy-rail-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  color: #aebac1;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.druppy-rail-btn:hover {
+  background-color: #202c33;
+  color: #f97316;
+  transform: scale(1.08);
+}
+
+.druppy-rail-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background-color: #f97316;
+  border-radius: 50%;
+  border: 2px solid #111b21;
+}
+
+/* ==========================================================================
+   3. STICKER PANEL (DUAL VIEW: POPUP / SIDEBAR KANAN)
+   ========================================================================== */
+#druppy-panel {
+  background-color: #111b21;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #e9edef;
+  box-sizing: border-box;
+}
+
+/* 3A. MODE POPUP (Floating di atas chat input bar) */
+#druppy-panel.druppy-mode-popup {
+  position: fixed;
+  bottom: 68px;
+  left: 20px;
+  width: 390px;
+  height: 460px;
+  max-height: 82vh;
+  border: 1px solid #222e35;
+  border-radius: 16px;
+  box-shadow: 0 12px 38px rgba(0, 0, 0, 0.75);
+  transform-origin: bottom left;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#druppy-panel.druppy-mode-popup.druppy-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.92) translateY(12px);
+}
+
+/* 3B. MODE SIDEBAR (Docked di sisi kanan layar) */
+#druppy-panel.druppy-mode-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  max-width: 90vw;
+  height: 100vh;
+  border-left: 1px solid #2a3942;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.65);
+  transform-origin: right center;
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#druppy-panel.druppy-mode-sidebar.druppy-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(100%);
+}
+
+/* Header inside Panel */
+.druppy-header {
+  padding: 11px 14px;
+  background-color: #202c33;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #2a3942;
+  flex-shrink: 0;
+}
+
+.druppy-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f97316;
+}
+
+.druppy-header-badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 7px;
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  border-radius: 10px;
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.druppy-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.druppy-btn-link {
+  background: transparent;
+  border: 1px solid #374248;
+  color: #aebac1;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.druppy-btn-link:hover {
+  border-color: #f97316;
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.08);
+}
+
+.druppy-btn-icon {
+  background: transparent;
+  border: none;
+  color: #aebac1;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.druppy-btn-icon:hover {
+  background: #2a3942;
+  color: #e9edef;
+}
+
+/* Tabs */
+.druppy-tabs {
+  display: flex;
+  align-items: center;
+  background-color: #111b21;
+  border-bottom: 1px solid #222e35;
+  padding: 8px 10px;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+.druppy-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.druppy-tab {
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: #202c33;
+  color: #aebac1;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.druppy-tab:hover {
+  background-color: #2a3942;
+  color: #e9edef;
+}
+
+.druppy-tab.active {
+  background-color: rgba(249, 115, 22, 0.2);
+  color: #f97316;
+  border-color: #f97316;
+}
+
+.druppy-tab-add {
+  background-color: transparent;
+  border: 1px dashed #374248;
+  color: #aebac1;
+}
+
+.druppy-tab-add:hover {
+  border-color: #f97316;
+  color: #f97316;
+}
+
+/* Toolbar */
+.druppy-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background-color: #182229;
+  border-bottom: 1px solid #222e35;
+  font-size: 11px;
+  color: #8696a0;
+  flex-shrink: 0;
+}
+
+.druppy-btn-action {
+  background: #202c33;
+  border: 1px solid #2a3942;
+  color: #e9edef;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+}
+
+.druppy-btn-action:hover {
+  background: #2a3942;
+  border-color: #f97316;
+  color: #f97316;
+}
+
+/* Sticker Grid Area in Popover / Sidebar */
+.druppy-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 78px;
+  gap: 8px;
+  align-content: start;
+}
+
+.druppy-body::-webkit-scrollbar {
+  width: 5px;
+}
+.druppy-body::-webkit-scrollbar-thumb {
+  background: #2a3942;
+  border-radius: 3px;
+}
+
+/* Single Sticker Item */
+.druppy-sticker-item {
+  background-color: #182229;
+  border: 1px solid #222e35;
+  border-radius: 10px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.druppy-sticker-item:hover {
+  transform: scale(1.08);
+  border-color: #f97316;
+  background-color: #202c33;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+.druppy-sticker-item img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.druppy-delete-sticker-btn {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 10px;
+  line-height: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+.druppy-sticker-item:hover .druppy-delete-sticker-btn {
+  display: flex;
+}
+
+.druppy-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  color: #8696a0;
+  text-align: center;
+  font-size: 12px;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   4. FULLSCREEN DRUPPY DASHBOARD MODAL
+   ========================================================================== */
+#druppy-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+#druppy-modal-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Default: FULL SCREEN LAYAR PENUH as requested */
+#druppy-dashboard-modal {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  background-color: #111b21;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #e9edef;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Mode Jendela (Optional Toggle) */
+#druppy-dashboard-modal.druppy-dash-windowed {
+  width: 900px;
+  max-width: 94vw;
+  height: 650px;
+  max-height: 92vh;
+  border: 1px solid #222e35;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+  transform: scale(0.96);
+}
+
+#druppy-modal-overlay.show #druppy-dashboard-modal.druppy-dash-windowed {
+  transform: scale(1);
+}
+
+/* Dashboard Header */
+.druppy-dash-header {
+  padding: 14px 24px;
+  background-color: #202c33;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #2a3942;
+  flex-shrink: 0;
+}
+
+.druppy-dash-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.druppy-dash-header-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f97316;
+  letter-spacing: 0.2px;
+}
+
+.druppy-dash-header-subtitle {
+  font-size: 11px;
+  color: #8696a0;
+  margin-top: 1px;
+}
+
+.druppy-dash-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.druppy-dash-btn-close {
+  background: #2a3942;
+  border: 1px solid #374248;
+  color: #e9edef;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.druppy-dash-btn-close:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: white;
+}
+
+.druppy-dash-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Dashboard Sidebar */
+.druppy-dash-sidebar {
+  width: 280px;
+  background-color: #182229;
+  border-right: 1px solid #222e35;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.druppy-dash-sidebar-header {
+  padding: 14px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #8696a0;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-bottom: 1px solid #222e35;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.druppy-dash-pack-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.druppy-dash-pack-item {
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #aebac1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+
+.druppy-dash-pack-item:hover {
+  background-color: #202c33;
+  color: #e9edef;
+}
+
+.druppy-dash-pack-item.active {
+  background-color: rgba(249, 115, 22, 0.16);
+  border-color: rgba(249, 115, 22, 0.35);
+  color: #f97316;
+  font-weight: 600;
+}
+
+.druppy-dash-sidebar-actions {
+  padding: 12px 14px;
+  border-top: 1px solid #222e35;
+}
+
+.druppy-btn-primary {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.druppy-btn-primary:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+/* Dashboard Settings Card (Popup vs Sidebar Kanan) */
+.druppy-dash-settings-card {
+  margin: 0 12px 14px 12px;
+  padding: 12px;
+  background-color: #202c33;
+  border: 1px solid #2a3942;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.druppy-dash-settings-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8696a0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.druppy-dash-mode-options {
+  display: flex;
+  gap: 6px;
+}
+
+.druppy-dash-mode-btn {
+  flex: 1;
+  padding: 7px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid #374248;
+  background: #182229;
+  color: #aebac1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.15s;
+}
+
+.druppy-dash-mode-btn:hover {
+  border-color: #f97316;
+  color: #f97316;
+}
+
+.druppy-dash-mode-btn.active {
+  background: rgba(249, 115, 22, 0.2);
+  border-color: #f97316;
+  color: #f97316;
+  font-weight: 600;
+}
+
+.druppy-dash-settings-hint {
+  font-size: 11px;
+  color: #8696a0;
+  line-height: 1.3;
+}
+
+/* Dashboard Main Content Area */
+.druppy-dash-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 24px 32px;
+  gap: 18px;
+  background-color: #111b21;
+}
+
+.druppy-dash-main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #222e35;
+  flex-shrink: 0;
+}
+
+.druppy-dash-pack-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e9edef;
+}
+
+.druppy-dash-pack-meta {
+  font-size: 12px;
+  color: #8696a0;
+  margin-top: 4px;
+}
+
+.druppy-dropzone {
+  border: 2px dashed #2a3942;
+  border-radius: 14px;
+  padding: 28px 20px;
+  text-align: center;
+  color: #8696a0;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #182229;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.druppy-dropzone:hover, .druppy-dropzone.dragover {
+  border-color: #f97316;
+  background: rgba(249, 115, 22, 0.06);
+  color: #f97316;
+}
+
+.druppy-dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 14px;
+}
+
+.druppy-dash-sticker-card {
+  height: 110px;
+  background-color: #182229;
+  border: 1px solid #222e35;
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.druppy-dash-sticker-card:hover {
+  border-color: #f97316;
+  background-color: #202c33;
+  transform: scale(1.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.druppy-dash-sticker-card img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* General SVG Icon support across buttons */
+.druppy-btn-link svg,
+.druppy-btn-action svg,
+.druppy-btn-primary svg,
+.druppy-btn-icon svg,
+.druppy-tab svg,
+.druppy-rail-btn svg,
+.druppy-dash-mode-btn svg {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.druppy-rail-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Checkerboard background for transparent sticker visualization */
+.druppy-checkerboard {
+  background-color: #111b21;
+  background-image:
+    linear-gradient(45deg, #182229 25%, transparent 25%),
+    linear-gradient(-45deg, #182229 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #182229 75%),
+    linear-gradient(-45deg, transparent 75%, #182229 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}
+
+/* ==========================================================================
+   5. STICKER DETAIL MODAL (Ketika di dashboard diklik)
+   ========================================================================== */
+#druppy-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(5px);
+  z-index: 100005;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+#druppy-detail-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.druppy-detail-modal {
+  width: 440px;
+  max-width: 92vw;
+  background-color: #111b21;
+  border: 1px solid #2a3942;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #e9edef;
+  transform: scale(0.94);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#druppy-detail-overlay.show .druppy-detail-modal {
+  transform: scale(1);
+}
+
+.druppy-detail-header {
+  padding: 12px 18px;
+  background-color: #202c33;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #2a3942;
+}
+
+.druppy-detail-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f97316;
+}
+
+.druppy-detail-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.druppy-detail-preview-container {
+  width: 200px;
+  height: 200px;
+  border-radius: 14px;
+  border: 1px solid #2a3942;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  box-sizing: border-box;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.druppy-detail-preview-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+}
+
+.druppy-detail-meta {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.druppy-detail-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.druppy-detail-name-input {
+  flex: 1;
+  background: #182229;
+  border: 1px solid #2a3942;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e9edef;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.druppy-detail-name-input:focus {
+  border-color: #f97316;
+  background: #202c33;
+}
+
+.druppy-detail-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.druppy-detail-tag {
+  font-size: 11px;
+  padding: 3px 8px;
+  background: #182229;
+  border: 1px solid #2a3942;
+  border-radius: 6px;
+  color: #8696a0;
+}
+
+.druppy-detail-tag.status-ready {
+  background: rgba(37, 211, 102, 0.12);
+  border-color: rgba(37, 211, 102, 0.3);
+  color: #25d366;
+}
+
+.druppy-detail-footer {
+  padding: 14px 20px;
+  background-color: #182229;
+  border-top: 1px solid #222e35;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.druppy-detail-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.druppy-btn-send-chat {
+  width: 100%;
+  padding: 11px 16px;
+  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 9px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3) !important;
+  transition: all 0.18s ease !important;
+}
+
+.druppy-btn-send-chat:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.45) !important;
+  opacity: 0.95 !important;
+}
+
+.druppy-detail-btn-crop {
+  flex: 1;
+  padding: 9px 12px;
+  background: #202c33;
+  border: 1px solid #2a3942;
+  color: #e9edef;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.druppy-detail-btn-crop:hover {
+  border-color: #f97316;
+  color: #f97316;
+  background: #2a3942;
+}
+
+.druppy-detail-btn-delete {
+  padding: 9px 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.druppy-detail-btn-delete:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* ==========================================================================
+   6. CROP STICKER MODAL
+   ========================================================================== */
+#druppy-crop-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(8px);
+  z-index: 100010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+#druppy-crop-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.druppy-crop-modal {
+  width: 580px;
+  max-width: 95vw;
+  background-color: #111b21;
+  border: 1px solid #2a3942;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #e9edef;
+  transform: scale(0.95);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#druppy-crop-overlay.show .druppy-crop-modal {
+  transform: scale(1);
+}
+
+.druppy-crop-header {
+  padding: 13px 20px;
+  background-color: #202c33;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #2a3942;
+}
+
+.druppy-crop-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f97316;
+}
+
+/* Toolbar inside Crop Modal */
+.druppy-crop-toolbar {
+  padding: 10px 18px;
+  background-color: #182229;
+  border-bottom: 1px solid #222e35;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.druppy-crop-toolgroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.druppy-crop-btn {
+  background: #202c33;
+  border: 1px solid #2a3942;
+  color: #aebac1;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s;
+}
+
+.druppy-crop-btn:hover {
+  border-color: #f97316;
+  color: #f97316;
+}
+
+.druppy-crop-btn.active {
+  background: rgba(249, 115, 22, 0.2);
+  border-color: #f97316;
+  color: #f97316;
+  font-weight: 600;
+}
+
+/* Interactive Crop Workspace */
+.druppy-crop-workspace {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  background: #0b141a;
+}
+
+.druppy-crop-container {
+  position: relative;
+  display: inline-block;
+  max-width: 90%;
+  max-height: 90%;
+  user-select: none;
+  touch-action: none;
+}
+
+.druppy-crop-container img {
+  display: block;
+  max-width: 100%;
+  max-height: 340px;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Crop Box Overlay */
+.druppy-crop-box {
+  position: absolute;
+  border: 2px dashed #f97316;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65);
+  cursor: move;
+  box-sizing: border-box;
+}
+
+/* 3x3 Grid guides inside crop box */
+.druppy-crop-box::before,
+.druppy-crop-box::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.druppy-crop-box::before {
+  top: 0;
+  bottom: 0;
+  left: 33.333%;
+  right: 33.333%;
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  border-right: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.druppy-crop-box::after {
+  left: 0;
+  right: 0;
+  top: 33.333%;
+  bottom: 33.333%;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Crop Handles */
+.druppy-crop-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: #f97316;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+.druppy-crop-handle.nw { top: -6px; left: -6px; cursor: nwse-resize; }
+.druppy-crop-handle.ne { top: -6px; right: -6px; cursor: nesw-resize; }
+.druppy-crop-handle.se { bottom: -6px; right: -6px; cursor: nwse-resize; }
+.druppy-crop-handle.sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
+.druppy-crop-handle.n { top: -6px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+.druppy-crop-handle.s { bottom: -6px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+.druppy-crop-handle.w { top: 50%; left: -6px; transform: translateY(-50%); cursor: ew-resize; }
+.druppy-crop-handle.e { top: 50%; right: -6px; transform: translateY(-50%); cursor: ew-resize; }
+
+.druppy-crop-footer {
+  padding: 14px 20px;
+  background-color: #182229;
+  border-top: 1px solid #222e35;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Toast */
+#druppy-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(50px);
+  background-color: #202c33;
+  color: #e9edef;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+  border: 1px solid #2a3942;
+  z-index: 100020;
+  opacity: 0;
+  transition: all 0.25s ease;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#druppy-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ==========================================================================
+   7. WHATSAPP REEXTENDED CONTEXT MENU (TITIK 3)
+   ========================================================================== */
+.druppy-context-menu-item {
+  display: flex !important;
+  align-items: center !important;
+  padding: 8px 16px !important;
+  cursor: pointer !important;
+  color: #e9edef !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+  user-select: none !important;
+  box-sizing: border-box !important;
+  list-style: none !important;
+  width: 100% !important;
+  min-height: 38px !important;
+  max-height: 40px !important;
+}
+
+.druppy-context-menu-item:hover {
+  background-color: rgba(249, 115, 22, 0.16) !important;
+  color: #f97316 !important;
+}
+
+.druppy-context-menu-inner {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  white-space: nowrap !important;
+}
+
+.druppy-context-menu-icon {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  object-fit: cover !important;
+  flex-shrink: 0 !important;
+  pointer-events: none !important;
+  margin: 0 1px !important;
+}
+
+.druppy-context-menu-inner span {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+/* ==========================================================================
+   8. WHATSAPP NATIVE STICKER PREVIEW MODAL ("TAMBAH KE FAVORIT" DIALOG)
+   ========================================================================== */
+.druppy-native-modal-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 8px 18px !important;
+  background-color: #202c33 !important;
+  border: 1px solid rgba(249, 115, 22, 0.6) !important;
+  border-radius: 20px !important;
+  color: #f97316 !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+  user-select: none !important;
+}
+
+.druppy-native-modal-btn:hover {
+  background-color: rgba(249, 115, 22, 0.18) !important;
+  border-color: #f97316 !important;
+  transform: scale(1.05) !important;
+  color: #fb923c !important;
+}
+
+.druppy-btn-logo-small {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  object-fit: cover !important;
+  pointer-events: none !important;
+}
+
+/* Pack Selector in Detail Modal */
+.druppy-detail-pack-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.druppy-detail-pack-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #8696a0 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  flex-shrink: 0 !important;
+}
+
+.druppy-detail-pack-select {
+  flex: 1 !important;
+  background: #182229 !important;
+  border: 1px solid #2a3942 !important;
+  border-radius: 8px !important;
+  padding: 7px 10px !important;
+  color: #e9edef !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  outline: none !important;
+  cursor: pointer !important;
+  transition: border-color 0.15s, background-color 0.15s !important;
+}
+
+.druppy-detail-pack-select:focus,
+.druppy-detail-pack-select:hover {
+  border-color: #f97316 !important;
+  background-color: #202c33 !important;
+}
