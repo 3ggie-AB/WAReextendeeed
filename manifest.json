@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WhatsappReextended",
-  "version": "1.3.2",
+  "version": "1.3.4",
   "description": "WhatsappReextended - Studio & Sticker Manager WhatsApp Web dengan fitur Crop, Custom Pack, dan pengiriman stiker asli.",
   "icons": {
     "16": "icons/icon16.png",

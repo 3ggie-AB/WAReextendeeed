@@ -279,7 +279,7 @@
   }
 
   // --- CONVERT UPLOADED IMAGE TO 512x512 WEBP STICKER ---
-  function convertImageToStickerWebP(fileOrDataUrl) {
+  function convertStaticImageToStickerWebP(fileOrDataUrl) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -327,6 +327,216 @@
         reader.readAsDataURL(fileOrDataUrl);
       }
     });
+  }
+
+  // --- ANIMATED STICKER (GIF / animated WebP -> 512x512 animated WebP) ---
+  // Canvas hanya bisa menyimpan satu frame, jadi gambar bergerak didekode per frame
+  // memakai ImageDecoder (WebCodecs), tiap frame di-encode ke WebP, lalu dirakit
+  // ulang menjadi satu file WebP animasi (RIFF: VP8X + ANIM + ANMF).
+  const ANIM_STICKER_SIZE = 512;          // WhatsApp mewajibkan 512x512 untuk stiker animasi
+  const ANIM_STICKER_MAX_BYTES = 500 * 1024; // batas ukuran stiker animasi WhatsApp
+  const ANIM_STICKER_MAX_FRAMES = 60;
+  const ANIM_STICKER_MAX_MS = 10000;
+
+  function sniffImageMime(bytes) {
+    if (bytes.length >= 6 && bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) return 'image/gif';
+    if (bytes.length >= 12 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+        bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return 'image/webp';
+    if (bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return 'image/png';
+    return '';
+  }
+
+  async function inputToBytes(fileOrDataUrl) {
+    const blob = typeof fileOrDataUrl === 'string'
+      ? await (await fetch(fileOrDataUrl)).blob()
+      : fileOrDataUrl;
+    return new Uint8Array(await blob.arrayBuffer());
+  }
+
+  // Ambil chunk ALPH / VP8 / VP8L (lengkap dengan header & padding) dari WebP satu frame
+  function extractWebpFrameChunks(bytes) {
+    const parts = [];
+    let off = 12;
+    while (off + 8 <= bytes.length) {
+      const fourcc = String.fromCharCode(bytes[off], bytes[off + 1], bytes[off + 2], bytes[off + 3]);
+      const size = bytes[off + 4] | (bytes[off + 5] << 8) | (bytes[off + 6] << 16) | (bytes[off + 7] << 24);
+      const total = 8 + size + (size & 1);
+      if (fourcc === 'ALPH' || fourcc === 'VP8 ' || fourcc === 'VP8L') {
+        parts.push(bytes.subarray(off, Math.min(off + total, bytes.length)));
+      }
+      off += total;
+    }
+    return parts;
+  }
+
+  function buildAnimatedWebp(frames, width, height) {
+    const u24 = (arr, o, v) => { arr[o] = v & 255; arr[o + 1] = (v >> 8) & 255; arr[o + 2] = (v >> 16) & 255; };
+    const u32 = (arr, o, v) => { arr[o] = v & 255; arr[o + 1] = (v >> 8) & 255; arr[o + 2] = (v >> 16) & 255; arr[o + 3] = (v >>> 24) & 255; };
+    const chunkHeader = (fourcc, size) => {
+      const h = new Uint8Array(8);
+      for (let i = 0; i < 4; i++) h[i] = fourcc.charCodeAt(i);
+      u32(h, 4, size);
+      return h;
+    };
+
+    const pieces = [];
+    // VP8X: flag animasi (0x02) + alpha (0x10)
+    const vp8x = new Uint8Array(10);
+    vp8x[0] = 0x12;
+    u24(vp8x, 4, width - 1);
+    u24(vp8x, 7, height - 1);
+    pieces.push(chunkHeader('VP8X', 10), vp8x);
+    // ANIM: background transparan, loop selamanya
+    pieces.push(chunkHeader('ANIM', 6), new Uint8Array(6));
+
+    for (const f of frames) {
+      const dataLen = f.chunks.reduce((s, c) => s + c.length, 0);
+      const hdr = new Uint8Array(16);
+      u24(hdr, 6, width - 1);
+      u24(hdr, 9, height - 1);
+      u24(hdr, 12, Math.max(20, Math.round(f.duration)));
+      hdr[15] = 0x02; // tanpa blending: tiap frame sudah berupa gambar utuh
+      pieces.push(chunkHeader('ANMF', 16 + dataLen), hdr, ...f.chunks);
+    }
+
+    const bodyLen = pieces.reduce((s, p) => s + p.length, 0);
+    const out = new Uint8Array(12 + bodyLen);
+    out.set([0x52, 0x49, 0x46, 0x46], 0);
+    u32(out, 4, 4 + bodyLen);
+    out.set([0x57, 0x45, 0x42, 0x50], 8);
+    let o = 12;
+    for (const p of pieces) { out.set(p, o); o += p.length; }
+    return out;
+  }
+
+  function canvasToWebpBytes(canvas, quality) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(async (blob) => {
+        if (!blob || blob.type !== 'image/webp') return reject(new Error('Browser tidak mendukung encode WebP'));
+        resolve(new Uint8Array(await blob.arrayBuffer()));
+      }, 'image/webp', quality);
+    });
+  }
+
+  function bytesToDataUrl(bytes, mime) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(new Blob([bytes], { type: mime }));
+    });
+  }
+
+  // Mengembalikan dataUrl WebP animasi, atau null kalau gambar ternyata tidak bergerak
+  // transform opsional dari Crop: { rotation, srcX, srcY, srcW, srcH } (koordinat piksel gambar setelah diputar)
+  async function convertAnimatedToStickerWebP(bytes, mime, transform) {
+    if (typeof ImageDecoder === 'undefined') return null;
+    if (mime !== 'image/gif' && mime !== 'image/webp') return null;
+    if (!(await ImageDecoder.isTypeSupported(mime))) return null;
+
+    const decoder = new ImageDecoder({ data: bytes, type: mime });
+    try {
+      await decoder.tracks.ready;
+      await decoder.completed;
+      const track = decoder.tracks.selectedTrack;
+      const frameCount = track ? track.frameCount : 1;
+      if (!track || !track.animated || frameCount < 2) return null;
+
+      // Dekode semua frame dulu (dengan durasi asli), batasi total durasi
+      const decoded = [];
+      let elapsed = 0;
+      for (let i = 0; i < frameCount && elapsed < ANIM_STICKER_MAX_MS; i++) {
+        const { image } = await decoder.decode({ frameIndex: i });
+        let dur = image.duration ? image.duration / 1000 : 100;
+        if (dur < 20) dur = 100; // GIF dengan delay 0 diputar 10fps seperti browser
+        const c = document.createElement('canvas');
+        c.width = ANIM_STICKER_SIZE;
+        c.height = ANIM_STICKER_SIZE;
+        const ctx = c.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        const iw = image.displayWidth, ih = image.displayHeight;
+        let source = image;
+        let sx = 0, sy = 0, sw = iw, sh = ih;
+        if (transform) {
+          const rot = ((transform.rotation || 0) % 360 + 360) % 360;
+          if (rot) {
+            const sideways = rot % 180 !== 0;
+            const rc = document.createElement('canvas');
+            rc.width = sideways ? ih : iw;
+            rc.height = sideways ? iw : ih;
+            const rctx = rc.getContext('2d');
+            rctx.translate(rc.width / 2, rc.height / 2);
+            rctx.rotate((rot * Math.PI) / 180);
+            rctx.drawImage(image, -iw / 2, -ih / 2);
+            source = rc;
+          }
+          sx = transform.srcX; sy = transform.srcY; sw = transform.srcW; sh = transform.srcH;
+        }
+        const maxDim = ANIM_STICKER_SIZE - 32;
+        const scale = Math.min(maxDim / sw, maxDim / sh);
+        const w = sw * scale, h = sh * scale;
+        ctx.drawImage(source, sx, sy, sw, sh, (ANIM_STICKER_SIZE - w) / 2, (ANIM_STICKER_SIZE - h) / 2, w, h);
+        image.close();
+        decoded.push({ canvas: c, duration: dur });
+        elapsed += dur;
+      }
+
+      // Kurangi jumlah frame bila terlalu banyak (durasi digabung supaya kecepatan tetap)
+      const sample = (list, maxCount) => {
+        if (list.length <= maxCount) return list;
+        const step = list.length / maxCount;
+        const out = [];
+        for (let k = 0; k < maxCount; k++) {
+          const from = Math.floor(k * step), to = Math.floor((k + 1) * step);
+          let d = 0;
+          for (let j = from; j < to; j++) d += list[j].duration;
+          out.push({ canvas: list[from].canvas, duration: d });
+        }
+        return out;
+      };
+
+      let frameSet = sample(decoded, ANIM_STICKER_MAX_FRAMES);
+      const qualities = [0.8, 0.65, 0.5, 0.35, 0.2];
+      let result = null;
+      for (let attempt = 0; attempt < 8 && !result; attempt++) {
+        for (const q of qualities) {
+          const frames = [];
+          for (const f of frameSet) {
+            frames.push({ chunks: extractWebpFrameChunks(await canvasToWebpBytes(f.canvas, q)), duration: f.duration });
+          }
+          const webp = buildAnimatedWebp(frames, ANIM_STICKER_SIZE, ANIM_STICKER_SIZE);
+          result = webp;
+          if (webp.length <= ANIM_STICKER_MAX_BYTES) break;
+          result = null;
+        }
+        if (!result) {
+          if (frameSet.length <= 4) break;
+          frameSet = sample(frameSet, Math.ceil(frameSet.length / 2));
+        }
+      }
+      if (!result) throw new Error('Animasi terlalu besar untuk stiker WhatsApp (maks 500KB)');
+      return await bytesToDataUrl(result, 'image/webp');
+    } finally {
+      decoder.close();
+    }
+  }
+
+  // Titik masuk utama: gambar bergerak tetap bergerak, gambar diam diproses seperti biasa
+  async function convertImageToStickerWebP(fileOrDataUrl) {
+    try {
+      const bytes = await inputToBytes(fileOrDataUrl);
+      const declared = typeof fileOrDataUrl === 'string'
+        ? (fileOrDataUrl.match(/^data:([^;,]+)/) || [])[1] || ''
+        : fileOrDataUrl.type || '';
+      const mime = sniffImageMime(bytes) || declared;
+      const animated = await convertAnimatedToStickerWebP(bytes, mime);
+      if (animated) return animated;
+    } catch (err) {
+      if (err && /terlalu besar/.test(err.message)) throw err;
+      console.warn('[WhatsappReextended] Proses animasi gagal, pakai gambar diam:', err);
+    }
+    return convertStaticImageToStickerWebP(fileOrDataUrl);
   }
 
   // =========================================================================
@@ -1087,6 +1297,7 @@
         added++;
       } catch (err) {
         console.error('[Druppy] Gagal memproses gambar:', f.name, err);
+        if (err && /terlalu besar/.test(err.message)) showToast(`${f.name}: ${err.message}`);
       }
     }
 
@@ -1422,6 +1633,14 @@
     loadSource();
 
     function renderRotatedView() {
+      // Tanpa putar: tampilkan gambar asli supaya GIF/WebP bergerak tetap terlihat bergerak
+      if (rotation % 360 === 0) {
+        cropImg.onload = () => {
+          resetCropBox();
+        };
+        cropImg.src = rawImage.src;
+        return;
+      }
       // Create offscreen canvas for rotation
       const offCanvas = document.createElement('canvas');
       const isSideways = rotation % 180 !== 0;
@@ -1629,7 +1848,18 @@
         const destY = (1024 - destH) / 2;
 
         finalCtx.drawImage(rotCanvas, srcX, srcY, srcW, srcH, destX, destY, destW, destH);
-        const webpDataUrl = finalCanvas.toDataURL('image/webp', 0.98);
+        let webpDataUrl = null;
+
+        // Gambar bergerak: crop & putar diterapkan ke setiap frame
+        try {
+          const bytes = await inputToBytes(rawImage.src);
+          const mime = sniffImageMime(bytes);
+          webpDataUrl = await convertAnimatedToStickerWebP(bytes, mime, { rotation, srcX, srcY, srcW, srcH });
+        } catch (animErr) {
+          if (animErr && /terlalu besar/.test(animErr.message)) throw animErr;
+          console.warn('[WhatsappReextended] Crop animasi gagal, pakai gambar diam:', animErr);
+        }
+        if (!webpDataUrl) webpDataUrl = finalCanvas.toDataURL('image/webp', 0.98);
 
         // Save target
         let targetPack = currentPack;
@@ -1712,6 +1942,22 @@
     if (!img) return null;
     if (img.src && img.src.startsWith('data:image/')) {
       return img.src;
+    }
+    // Baca file asli dulu: lewat canvas, stiker bergerak akan jadi diam
+    if (img.src) {
+      try {
+        const blob = await (await fetch(img.src)).blob();
+        if (blob && blob.size > 0 && blob.type.startsWith('image/')) {
+          return await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch (e) {
+        console.warn('[WhatsappReextended] Fetch gambar gagal, pakai canvas:', e);
+      }
     }
     try {
       const canvas = document.createElement('canvas');

@@ -26,6 +26,7 @@ Ekstensi browser Chrome / Chromium (Brave, Edge, Chrome) untuk mengelola banyak 
    - Pilihan rasio aspek: **1:1 Kotak (Standar Stiker WhatsApp)** dan **Bebas**.
    - Tombol **Putar 90°** dan **Reset**.
    - Otomatis mengubah gambar apa pun menjadi resolusi standar **512×512 WebP transparan**.
+   - **GIF / WebP bergerak tetap bergerak** (juga setelah di-crop): diubah jadi stiker animasi 512×512 di bawah 500KB.
 
 6. **Modal Detail Stiker pada Dashboard:**
    - Mengklik stiker di Dashboard membuka tampilan Detail (tidak langsung terkirim secara tidak sengaja).
